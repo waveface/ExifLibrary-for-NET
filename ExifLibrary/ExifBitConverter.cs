@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Text;
+using System.Globalization;
 
 namespace ExifLibrary
 {
@@ -8,6 +9,11 @@ namespace ExifLibrary
     /// </summary>
     public class ExifBitConverter : BitConverterEx
     {
+        #region Constants
+        private static readonly string[] DATETIME_FORMATS = new string[] { "yyyy:MM:dd HH:mm:ss", "yyyy-MM-dd HH:mm:ss", "yyyy/MM/dd HH:mm:ss" };
+        private static readonly string[] DATE_FORMAT = new string[] { "yyyy:MM:dd", "yyyy-MM-dd", "yyyy/MM/dd" };
+        #endregion
+
         #region "Constructors"
         public ExifBitConverter(ByteOrder from, ByteOrder to)
             : base(from, to)
@@ -56,11 +62,13 @@ namespace ExifLibrary
         /// </summary>
         public static DateTime ToDateTime(byte[] data, bool hastime)
         {
+            var style = DateTimeStyles.AssumeLocal | DateTimeStyles.AllowWhiteSpaces;
+
             string str = ToAscii(data);
             if (hastime)
-                return DateTime.ParseExact(str, "yyyy:MM:dd HH:mm:ss", System.Globalization.CultureInfo.InvariantCulture);
+                return DateTime.ParseExact(str, DATETIME_FORMATS, System.Globalization.CultureInfo.InvariantCulture, style);
             else
-                return DateTime.ParseExact(str, "yyyy:MM:dd", System.Globalization.CultureInfo.InvariantCulture);
+                return DateTime.ParseExact(str, DATE_FORMAT, System.Globalization.CultureInfo.InvariantCulture, style);
         }
 
         /// <summary>

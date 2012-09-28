@@ -1,6 +1,6 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 10.00
-# Visual Studio 2008
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExifLibrary", "ExifLibrary\ExifLibrary.csproj", "{C29BA585-E27B-4AD0-9AD1-490B5E0E2A5E}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExifTest", "ExifTest\ExifTest.csproj", "{9F04C806-6BB9-449D-AF51-63E004162C1C}"
