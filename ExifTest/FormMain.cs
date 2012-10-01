@@ -37,7 +37,12 @@ namespace ExifLibrary
 
         private void ReadFile(string filename)
         {
-            data = ExifFile.Read(filename);
+            using (var file = File.OpenRead(filename))
+            {
+                //data = ExifFile.Read(filename);
+                data = ExifFile.Read(file);
+            }
+
             Settings.Default.Lastfile = filename;
             Settings.Default.Save();
             lvExif.Items.Clear();
