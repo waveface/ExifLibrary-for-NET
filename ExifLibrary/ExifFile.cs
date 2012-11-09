@@ -246,8 +246,15 @@ namespace ExifLibrary
                     }
 
                     // Create the exif property from the interop data
-                    ExifProperty prop = ExifPropertyFactory.Get(tag, type, count, value, ByteOrder, currentifd);
-                    Properties.Add(prop.Tag, prop);
+                    try
+                    {
+                        ExifProperty prop = ExifPropertyFactory.Get(tag, type, count, value, ByteOrder, currentifd);
+                        Properties.Add(prop.Tag, prop);
+                    }
+                    catch
+                    {
+                        
+                    }
 #if DEBUG
                     mMap.Seek(fieldoffset, SeekOrigin.Begin);
                     mMap.Write(new Bin(ExifTagFactory.GetTagName(currentifd, tag) + " ID: " + tag.ToString(), 6, 2, prop));
