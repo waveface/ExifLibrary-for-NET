@@ -59,67 +59,67 @@ namespace ExifLibrary
         /// disposing the stream.
         /// </summary>
         /// <param name="stream">The data stream used to save the image.</param>
-        public void Save(Stream stream)
-        {
-            // Write sections
-            foreach (JPEGSection section in Sections)
-            {
-                // Section header (including length bytes and section marker) 
-                // must not exceed 64 kB.
-                if (section.Header.Length + 2 + 2 > 64 * 1024)
-                    throw new SectionExceeds64KBException();
+        //public void Save(Stream stream)
+        //{
+        //    // Write sections
+        //    foreach (JPEGSection section in Sections)
+        //    {
+        //        // Section header (including length bytes and section marker) 
+        //        // must not exceed 64 kB.
+        //        if (section.Header.Length + 2 + 2 > 64 * 1024)
+        //            throw new SectionExceeds64KBException();
 
-                // Write section marker
-                stream.Write(new byte[] { 0xFF, (byte)section.Marker }, 0, 2);
+        //        // Write section marker
+        //        stream.Write(new byte[] { 0xFF, (byte)section.Marker }, 0, 2);
 
-                // Write section header
-                if (section.Header.Length != 0)
-                {
-                    // Header length including the length field itself
-                    stream.Write(BitConverterEx.BigEndian.GetBytes((ushort)(section.Header.Length + 2)), 0, 2);
+        //        // Write section header
+        //        if (section.Header.Length != 0)
+        //        {
+        //            // Header length including the length field itself
+        //            stream.Write(BitConverterEx.BigEndian.GetBytes((ushort)(section.Header.Length + 2)), 0, 2);
 
-                    // Section header
-                    stream.Write(section.Header, 0, section.Header.Length);
-                }
+        //            // Section header
+        //            stream.Write(section.Header, 0, section.Header.Length);
+        //        }
 
-                // Write entropy coded data
-                if (section.EntropyData.Length != 0)
-                    stream.Write(section.EntropyData, 0, section.EntropyData.Length);
-            }
+        //        // Write entropy coded data
+        //        if (section.EntropyData.Length != 0)
+        //            stream.Write(section.EntropyData, 0, section.EntropyData.Length);
+        //    }
 
-            // Write trailing data, if any
-            if (TrailingData.Length != 0)
-                stream.Write(TrailingData, 0, TrailingData.Length);
-        }
+        //    // Write trailing data, if any
+        //    if (TrailingData.Length != 0)
+        //        stream.Write(TrailingData, 0, TrailingData.Length);
+        //}
 
         /// <summary>
         /// Saves the JPEG image with the given filename.
         /// </summary>
         /// <param name="filename">The complete path to the JPEG file.</param>
-        public void Save(string filename)
-        {
-            using (FileStream stream = new FileStream(filename, FileMode.Create, FileAccess.Write))
-            {
-                Save(stream);
-                stream.Close();
-            }
-        }
+		//public void Save(string filename)
+		//{
+		//    using (FileStream stream = new FileStream(filename, FileMode.Create, FileAccess.Write))
+		//    {
+		//        Save(stream);
+		//        stream.Close();
+		//    }
+		//}
 
         /// <summary>
         /// Converts the JPEGFile to a System.Drawing.Bitmap.
         /// </summary>
         /// <returns>Returns a System.Drawing.Bitmap containing image data.</returns>
-        public Bitmap ToBitmap()
-        {
-            Bitmap bmp;
-            using (MemoryStream stream = new MemoryStream())
-            {
-                Save(stream);
-                bmp = new Bitmap(stream);
-                stream.Close();
-            }
-            return bmp;
-        }
+		//public Bitmap ToBitmap()
+		//{
+		//    Bitmap bmp;
+		//    using (MemoryStream stream = new MemoryStream())
+		//    {
+		//        Save(stream);
+		//        bmp = new Bitmap(stream);
+		//        stream.Close();
+		//    }
+		//    return bmp;
+		//}
         #endregion
 
         #region "Private Helper Methods"
@@ -132,8 +132,7 @@ namespace ExifLibrary
         {
             Sections = new List<JPEGSection>();
 
-            using (stream)
-            {
+
                 // Read the Start of Image (SOI) marker. SOI marker is represented
                 // with two bytes: 0xFF, 0xD8.
                 byte[] markerbytes = new byte[2];
@@ -210,20 +209,20 @@ namespace ExifLibrary
                                 // We reached a section marker. Calculate the
                                 // length of the entropy coded data.
                                 stream.Seek(-2, SeekOrigin.Current);
-                                long edlength = stream.Position - position;
-                                stream.Seek(-edlength, SeekOrigin.Current);
+                                //long edlength = stream.Position - position;
+                                //stream.Seek(-edlength, SeekOrigin.Current);
 
-                                // Read entropy coded data
-                                entropydata = new byte[edlength];
-                                int bytestoread = entropydata.Length;
-                                while (bytestoread > 0)
-                                {
-                                    int count = Math.Min(bytestoread, 4 * 1024);
-                                    int bytesread = stream.Read(entropydata, entropydata.Length - bytestoread, count);
-                                    if (bytesread == 0)
-                                        throw new NotValidJPEGFileException();
-                                    bytestoread -= bytesread;
-                                }
+                                //// Read entropy coded data
+                                //entropydata = new byte[edlength];
+                                //int bytestoread = entropydata.Length;
+                                //while (bytestoread > 0)
+                                //{
+                                //    int count = Math.Min(bytestoread, 4 * 1024);
+                                //    int bytesread = stream.Read(entropydata, entropydata.Length - bytestoread, count);
+                                //    if (bytesread == 0)
+                                //        throw new NotValidJPEGFileException();
+                                //    bytestoread -= bytesread;
+                                //}
 
                                 break;
                             }
@@ -231,8 +230,11 @@ namespace ExifLibrary
                     }
 
                     // Store section.
-                    JPEGSection section = new JPEGSection(marker, header, entropydata);
-                    Sections.Add(section);
+                    if (JPEGMarker.APP0 <= marker && marker <= JPEGMarker.APP15)
+                    {
+                        JPEGSection section = new JPEGSection(marker, header, entropydata);
+                        Sections.Add(section);
+                    }
 
                     // Some propriety formats store data past the EOI marker
                     if (marker == JPEGMarker.EOI)
@@ -249,8 +251,6 @@ namespace ExifLibrary
                         }
                     }
                 }
-                stream.Close();
-            }
         }
         #endregion
     }

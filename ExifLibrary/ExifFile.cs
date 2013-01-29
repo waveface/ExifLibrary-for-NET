@@ -34,7 +34,7 @@ namespace ExifLibrary
         /// <summary>
         /// Gets or sets the embedded thumbnail image.
         /// </summary>
-        public JPEGFile Thumbnail { get; set; }
+        public Stream Thumbnail { get; set; }
         /// <summary>
         /// Gets or sets the Exif property with the given key.
         /// </summary>
@@ -70,10 +70,10 @@ namespace ExifLibrary
         /// Saves the JPEG/Exif image with the given filename.
         /// </summary>
         /// <param name="filename">The complete path to the JPEG/Exif file.</param>
-        public void Save(string filename)
-        {
-            Save(filename, true);
-        }
+		//public void Save(string filename)
+		//{
+		//    Save(filename, true);
+		//}
 
         /// <summary>
         /// Saves the JPEG/Exif image with the given filename.
@@ -81,19 +81,19 @@ namespace ExifLibrary
         /// <param name="filename">The complete path to the JPEG/Exif file.</param>
         /// <param name="preserveMakerNote">Determines whether the maker note offset of
         /// the original file will be preserved.</param>
-        public void Save(string filename, bool preserveMakerNote)
-        {
-            WriteApp1(preserveMakerNote);
-            file.Save(filename);
-        }
+		//public void Save(string filename, bool preserveMakerNote)
+		//{
+		//    WriteApp1(preserveMakerNote);
+		//    file.Save(filename);
+		//}
 
         /// <summary>
         /// Returns a System.Drawing.Bitmap created with image data.
         /// </summary>
-        public Bitmap ToBitmap()
-        {
-            return file.ToBitmap();
-        }
+		//public Bitmap ToBitmap()
+		//{
+		//    return file.ToBitmap();
+		//}
         #endregion
 
         #region "Private Helper Methods"
@@ -282,10 +282,11 @@ namespace ExifLibrary
                 {
                     if (thumbtype == 0)
                     {
-                        using (MemoryStream ts = new MemoryStream(header, tiffoffset + thumboffset, thumblength))
-                        {
-                            Thumbnail = new JPEGFile(ts);
-                        }
+						Thumbnail = new MemoryStream(header, tiffoffset + thumboffset, thumblength);
+						//using (MemoryStream ts = new MemoryStream(header, tiffoffset + thumboffset, thumblength))
+						//{
+						//    Thumbnail = new JPEGFile(ts);
+						//}
                     }
 #if DEBUG
                     mMap.Seek(tiffoffset + thumboffset, SeekOrigin.Begin);
@@ -298,276 +299,276 @@ namespace ExifLibrary
         /// <summary>
         /// Replaces the contents of the APP1 section with the Exif properties.
         /// </summary>
-        private void WriteApp1(bool preserveMakerNote)
-        {
-            // Zero out IFD field offsets. We will fill those as we write the IFD sections
-            exifIFDFieldOffset = 0;
-            gpsIFDFieldOffset = 0;
-            interopIFDFieldOffset = 0;
-            firstIFDFieldOffset = 0;
-            // We also do not know the location of the embedded thumbnail yet
-            thumbOffsetLocation = 0;
-            thumbOffsetValue = 0;
-            thumbSizeLocation = 0;
-            thumbSizeValue = 0;
+		//private void WriteApp1(bool preserveMakerNote)
+		//{
+		//    // Zero out IFD field offsets. We will fill those as we write the IFD sections
+		//    exifIFDFieldOffset = 0;
+		//    gpsIFDFieldOffset = 0;
+		//    interopIFDFieldOffset = 0;
+		//    firstIFDFieldOffset = 0;
+		//    // We also do not know the location of the embedded thumbnail yet
+		//    thumbOffsetLocation = 0;
+		//    thumbOffsetValue = 0;
+		//    thumbSizeLocation = 0;
+		//    thumbSizeValue = 0;
 
-            // Which IFD sections do we have?
-            Dictionary<ExifTag, ExifProperty> ifdzeroth = new Dictionary<ExifTag, ExifProperty>();
-            Dictionary<ExifTag, ExifProperty> ifdexif = new Dictionary<ExifTag, ExifProperty>();
-            Dictionary<ExifTag, ExifProperty> ifdgps = new Dictionary<ExifTag, ExifProperty>();
-            Dictionary<ExifTag, ExifProperty> ifdinterop = new Dictionary<ExifTag, ExifProperty>();
-            Dictionary<ExifTag, ExifProperty> ifdfirst = new Dictionary<ExifTag, ExifProperty>();
+		//    // Which IFD sections do we have?
+		//    Dictionary<ExifTag, ExifProperty> ifdzeroth = new Dictionary<ExifTag, ExifProperty>();
+		//    Dictionary<ExifTag, ExifProperty> ifdexif = new Dictionary<ExifTag, ExifProperty>();
+		//    Dictionary<ExifTag, ExifProperty> ifdgps = new Dictionary<ExifTag, ExifProperty>();
+		//    Dictionary<ExifTag, ExifProperty> ifdinterop = new Dictionary<ExifTag, ExifProperty>();
+		//    Dictionary<ExifTag, ExifProperty> ifdfirst = new Dictionary<ExifTag, ExifProperty>();
 
-            foreach (KeyValuePair<ExifTag, ExifProperty> pair in Properties)
-            {
-                switch (pair.Value.IFD)
-                {
-                    case IFD.Zeroth:
-                        ifdzeroth.Add(pair.Key, pair.Value);
-                        break;
-                    case IFD.EXIF:
-                        ifdexif.Add(pair.Key, pair.Value);
-                        break;
-                    case IFD.GPS:
-                        ifdgps.Add(pair.Key, pair.Value);
-                        break;
-                    case IFD.Interop:
-                        ifdinterop.Add(pair.Key, pair.Value);
-                        break;
-                    case IFD.First:
-                        ifdfirst.Add(pair.Key, pair.Value);
-                        break;
-                }
-            }
+		//    foreach (KeyValuePair<ExifTag, ExifProperty> pair in Properties)
+		//    {
+		//        switch (pair.Value.IFD)
+		//        {
+		//            case IFD.Zeroth:
+		//                ifdzeroth.Add(pair.Key, pair.Value);
+		//                break;
+		//            case IFD.EXIF:
+		//                ifdexif.Add(pair.Key, pair.Value);
+		//                break;
+		//            case IFD.GPS:
+		//                ifdgps.Add(pair.Key, pair.Value);
+		//                break;
+		//            case IFD.Interop:
+		//                ifdinterop.Add(pair.Key, pair.Value);
+		//                break;
+		//            case IFD.First:
+		//                ifdfirst.Add(pair.Key, pair.Value);
+		//                break;
+		//        }
+		//    }
 
-            // Add IFD pointers if they are missing
-            // We will write the pointer values later on
-            if (ifdexif.Count != 0 && !ifdzeroth.ContainsKey(ExifTag.EXIFIFDPointer))
-                ifdzeroth.Add(ExifTag.EXIFIFDPointer, new ExifUInt(ExifTag.EXIFIFDPointer, 0));
-            if (ifdgps.Count != 0 && !ifdzeroth.ContainsKey(ExifTag.GPSIFDPointer))
-                ifdzeroth.Add(ExifTag.GPSIFDPointer, new ExifUInt(ExifTag.GPSIFDPointer, 0));
-            if (ifdinterop.Count != 0 && !ifdexif.ContainsKey(ExifTag.InteroperabilityIFDPointer))
-                ifdexif.Add(ExifTag.InteroperabilityIFDPointer, new ExifUInt(ExifTag.InteroperabilityIFDPointer, 0));
+		//    // Add IFD pointers if they are missing
+		//    // We will write the pointer values later on
+		//    if (ifdexif.Count != 0 && !ifdzeroth.ContainsKey(ExifTag.EXIFIFDPointer))
+		//        ifdzeroth.Add(ExifTag.EXIFIFDPointer, new ExifUInt(ExifTag.EXIFIFDPointer, 0));
+		//    if (ifdgps.Count != 0 && !ifdzeroth.ContainsKey(ExifTag.GPSIFDPointer))
+		//        ifdzeroth.Add(ExifTag.GPSIFDPointer, new ExifUInt(ExifTag.GPSIFDPointer, 0));
+		//    if (ifdinterop.Count != 0 && !ifdexif.ContainsKey(ExifTag.InteroperabilityIFDPointer))
+		//        ifdexif.Add(ExifTag.InteroperabilityIFDPointer, new ExifUInt(ExifTag.InteroperabilityIFDPointer, 0));
 
-            // Remove IFD pointers if IFD sections are missing
-            if (ifdexif.Count == 0 && ifdzeroth.ContainsKey(ExifTag.EXIFIFDPointer))
-                ifdzeroth.Remove(ExifTag.EXIFIFDPointer);
-            if (ifdgps.Count == 0 && ifdzeroth.ContainsKey(ExifTag.GPSIFDPointer))
-                ifdzeroth.Remove(ExifTag.GPSIFDPointer);
-            if (ifdinterop.Count == 0 && ifdexif.ContainsKey(ExifTag.InteroperabilityIFDPointer))
-                ifdexif.Remove(ExifTag.InteroperabilityIFDPointer);
+		//    // Remove IFD pointers if IFD sections are missing
+		//    if (ifdexif.Count == 0 && ifdzeroth.ContainsKey(ExifTag.EXIFIFDPointer))
+		//        ifdzeroth.Remove(ExifTag.EXIFIFDPointer);
+		//    if (ifdgps.Count == 0 && ifdzeroth.ContainsKey(ExifTag.GPSIFDPointer))
+		//        ifdzeroth.Remove(ExifTag.GPSIFDPointer);
+		//    if (ifdinterop.Count == 0 && ifdexif.ContainsKey(ExifTag.InteroperabilityIFDPointer))
+		//        ifdexif.Remove(ExifTag.InteroperabilityIFDPointer);
 
-            if (ifdzeroth.Count == 0)
-                throw new IFD0IsEmptyException();
+		//    if (ifdzeroth.Count == 0)
+		//        throw new IFD0IsEmptyException();
 
-            // We will need these bitconverters to write byte-ordered data
-            BitConverterEx bceJPEG = new BitConverterEx(BitConverterEx.ByteOrder.System, BitConverterEx.ByteOrder.BigEndian);
-            BitConverterEx bceExif = new BitConverterEx(BitConverterEx.ByteOrder.System, ByteOrder);
+		//    // We will need these bitconverters to write byte-ordered data
+		//    BitConverterEx bceJPEG = new BitConverterEx(BitConverterEx.ByteOrder.System, BitConverterEx.ByteOrder.BigEndian);
+		//    BitConverterEx bceExif = new BitConverterEx(BitConverterEx.ByteOrder.System, ByteOrder);
 
-            // Create a memory stream to write the APP1 section to
-            MemoryStream ms = new MemoryStream();
+		//    // Create a memory stream to write the APP1 section to
+		//    MemoryStream ms = new MemoryStream();
 
-            // Exif identifer
-            ms.Write(Encoding.ASCII.GetBytes("Exif\0\0"), 0, 6);
+		//    // Exif identifer
+		//    ms.Write(Encoding.ASCII.GetBytes("Exif\0\0"), 0, 6);
 
-            // TIFF header
-            // Byte order
-            long tiffoffset = ms.Position;
-            ms.Write((ByteOrder == BitConverterEx.ByteOrder.LittleEndian ? new byte[] { 0x49, 0x49 } : new byte[] { 0x4D, 0x4D }), 0, 2);
-            // TIFF ID
-            ms.Write(bceExif.GetBytes((ushort)42), 0, 2);
-            // Offset to 0th IFD
-            ms.Write(bceExif.GetBytes((uint)8), 0, 4);
+		//    // TIFF header
+		//    // Byte order
+		//    long tiffoffset = ms.Position;
+		//    ms.Write((ByteOrder == BitConverterEx.ByteOrder.LittleEndian ? new byte[] { 0x49, 0x49 } : new byte[] { 0x4D, 0x4D }), 0, 2);
+		//    // TIFF ID
+		//    ms.Write(bceExif.GetBytes((ushort)42), 0, 2);
+		//    // Offset to 0th IFD
+		//    ms.Write(bceExif.GetBytes((uint)8), 0, 4);
 
-            // Write IFDs
-            WriteIFD(ms, ifdzeroth, IFD.Zeroth, tiffoffset, preserveMakerNote);
-            uint exififdrelativeoffset = (uint)(ms.Position - tiffoffset);
-            WriteIFD(ms, ifdexif, IFD.EXIF, tiffoffset, preserveMakerNote);
-            uint gpsifdrelativeoffset = (uint)(ms.Position - tiffoffset);
-            WriteIFD(ms, ifdgps, IFD.GPS, tiffoffset, preserveMakerNote);
-            uint interopifdrelativeoffset = (uint)(ms.Position - tiffoffset);
-            WriteIFD(ms, ifdinterop, IFD.Interop, tiffoffset, preserveMakerNote);
-            uint firstifdrelativeoffset = (uint)(ms.Position - tiffoffset);
-            WriteIFD(ms, ifdfirst, IFD.First, tiffoffset, preserveMakerNote);
+		//    // Write IFDs
+		//    WriteIFD(ms, ifdzeroth, IFD.Zeroth, tiffoffset, preserveMakerNote);
+		//    uint exififdrelativeoffset = (uint)(ms.Position - tiffoffset);
+		//    WriteIFD(ms, ifdexif, IFD.EXIF, tiffoffset, preserveMakerNote);
+		//    uint gpsifdrelativeoffset = (uint)(ms.Position - tiffoffset);
+		//    WriteIFD(ms, ifdgps, IFD.GPS, tiffoffset, preserveMakerNote);
+		//    uint interopifdrelativeoffset = (uint)(ms.Position - tiffoffset);
+		//    WriteIFD(ms, ifdinterop, IFD.Interop, tiffoffset, preserveMakerNote);
+		//    uint firstifdrelativeoffset = (uint)(ms.Position - tiffoffset);
+		//    WriteIFD(ms, ifdfirst, IFD.First, tiffoffset, preserveMakerNote);
 
-            // Now that we now the location of IFDs we can go back and write IFD offsets
-            if (exifIFDFieldOffset != 0)
-            {
-                ms.Seek(exifIFDFieldOffset, SeekOrigin.Begin);
-                ms.Write(bceExif.GetBytes(exififdrelativeoffset), 0, 4);
-            }
-            if (gpsIFDFieldOffset != 0)
-            {
-                ms.Seek(gpsIFDFieldOffset, SeekOrigin.Begin);
-                ms.Write(bceExif.GetBytes(gpsifdrelativeoffset), 0, 4);
-            }
-            if (interopIFDFieldOffset != 0)
-            {
-                ms.Seek(interopIFDFieldOffset, SeekOrigin.Begin);
-                ms.Write(bceExif.GetBytes(interopifdrelativeoffset), 0, 4);
-            }
-            if (firstIFDFieldOffset != 0)
-            {
-                ms.Seek(firstIFDFieldOffset, SeekOrigin.Begin);
-                ms.Write(bceExif.GetBytes(firstifdrelativeoffset), 0, 4);
-            }
-            // We can write thumbnail location now
-            if (thumbOffsetLocation != 0)
-            {
-                ms.Seek(thumbOffsetLocation, SeekOrigin.Begin);
-                ms.Write(bceExif.GetBytes(thumbOffsetValue), 0, 4);
-            }
-            if (thumbSizeLocation != 0)
-            {
-                ms.Seek(thumbSizeLocation, SeekOrigin.Begin);
-                ms.Write(bceExif.GetBytes(thumbSizeValue), 0, 4);
-            }
+		//    // Now that we now the location of IFDs we can go back and write IFD offsets
+		//    if (exifIFDFieldOffset != 0)
+		//    {
+		//        ms.Seek(exifIFDFieldOffset, SeekOrigin.Begin);
+		//        ms.Write(bceExif.GetBytes(exififdrelativeoffset), 0, 4);
+		//    }
+		//    if (gpsIFDFieldOffset != 0)
+		//    {
+		//        ms.Seek(gpsIFDFieldOffset, SeekOrigin.Begin);
+		//        ms.Write(bceExif.GetBytes(gpsifdrelativeoffset), 0, 4);
+		//    }
+		//    if (interopIFDFieldOffset != 0)
+		//    {
+		//        ms.Seek(interopIFDFieldOffset, SeekOrigin.Begin);
+		//        ms.Write(bceExif.GetBytes(interopifdrelativeoffset), 0, 4);
+		//    }
+		//    if (firstIFDFieldOffset != 0)
+		//    {
+		//        ms.Seek(firstIFDFieldOffset, SeekOrigin.Begin);
+		//        ms.Write(bceExif.GetBytes(firstifdrelativeoffset), 0, 4);
+		//    }
+		//    // We can write thumbnail location now
+		//    if (thumbOffsetLocation != 0)
+		//    {
+		//        ms.Seek(thumbOffsetLocation, SeekOrigin.Begin);
+		//        ms.Write(bceExif.GetBytes(thumbOffsetValue), 0, 4);
+		//    }
+		//    if (thumbSizeLocation != 0)
+		//    {
+		//        ms.Seek(thumbSizeLocation, SeekOrigin.Begin);
+		//        ms.Write(bceExif.GetBytes(thumbSizeValue), 0, 4);
+		//    }
 
-            ms.Close();
+		//    ms.Close();
 
-            // Return APP1 header
-            app1.Header = ms.ToArray();
-        }
+		//    // Return APP1 header
+		//    app1.Header = ms.ToArray();
+		//}
 
-        private void WriteIFD(MemoryStream stream, Dictionary<ExifTag, ExifProperty> ifd, IFD ifdtype, long tiffoffset, bool preserveMakerNote)
-        {
-            BitConverterEx conv = new BitConverterEx(BitConverterEx.ByteOrder.System, ByteOrder);
+		//private void WriteIFD(MemoryStream stream, Dictionary<ExifTag, ExifProperty> ifd, IFD ifdtype, long tiffoffset, bool preserveMakerNote)
+		//{
+		//    BitConverterEx conv = new BitConverterEx(BitConverterEx.ByteOrder.System, ByteOrder);
 
-            // Create a queue of fields to write
-            Queue<ExifProperty> fieldqueue = new Queue<ExifProperty>();
-            foreach (ExifProperty prop in ifd.Values)
-                if (prop.Tag != ExifTag.MakerNote)
-                    fieldqueue.Enqueue(prop);
-            // Push the maker note data to the end
-            if (ifd.ContainsKey(ExifTag.MakerNote))
-                fieldqueue.Enqueue(ifd[ExifTag.MakerNote]);
+		//    // Create a queue of fields to write
+		//    Queue<ExifProperty> fieldqueue = new Queue<ExifProperty>();
+		//    foreach (ExifProperty prop in ifd.Values)
+		//        if (prop.Tag != ExifTag.MakerNote)
+		//            fieldqueue.Enqueue(prop);
+		//    // Push the maker note data to the end
+		//    if (ifd.ContainsKey(ExifTag.MakerNote))
+		//        fieldqueue.Enqueue(ifd[ExifTag.MakerNote]);
 
-            // Offset to start of field data from start of TIFF header
-            uint dataoffset = (uint)(2 + ifd.Count * 12 + 4 + stream.Position - tiffoffset);
-            uint currentdataoffset = dataoffset;
-            long absolutedataoffset = stream.Position + (2 + ifd.Count * 12 + 4);
+		//    // Offset to start of field data from start of TIFF header
+		//    uint dataoffset = (uint)(2 + ifd.Count * 12 + 4 + stream.Position - tiffoffset);
+		//    uint currentdataoffset = dataoffset;
+		//    long absolutedataoffset = stream.Position + (2 + ifd.Count * 12 + 4);
 
-            bool makernotewritten = false;
-            // Field count
-            stream.Write(conv.GetBytes((ushort)ifd.Count), 0, 2);
-            // Fields
-            while (fieldqueue.Count != 0)
-            {
-                ExifProperty field = fieldqueue.Dequeue();
-                ExifInterOperability interop = field.Interoperability;
+		//    bool makernotewritten = false;
+		//    // Field count
+		//    stream.Write(conv.GetBytes((ushort)ifd.Count), 0, 2);
+		//    // Fields
+		//    while (fieldqueue.Count != 0)
+		//    {
+		//        ExifProperty field = fieldqueue.Dequeue();
+		//        ExifInterOperability interop = field.Interoperability;
 
-                uint fillerbytecount = 0;
+		//        uint fillerbytecount = 0;
 
-                // Try to preserve the makernote data offset
-                if (!makernotewritten &&
-                    !makerNoteProcessed &&
-                    makerNoteOffset != 0 &&
-                    ifdtype == IFD.EXIF &&
-                    field.Tag != ExifTag.MakerNote &&
-                    interop.Data.Length > 4 &&
-                    currentdataoffset + interop.Data.Length > makerNoteOffset &&
-                    ifd.ContainsKey(ExifTag.MakerNote))
-                {
-                    // Delay writing this field until we write makernote data
-                    fieldqueue.Enqueue(field);
-                    continue;
-                }
-                else if (field.Tag == ExifTag.MakerNote)
-                {
-                    makernotewritten = true;
-                    // We may need to write filler bytes to preserve maker note offset
-                    if (preserveMakerNote && !makerNoteProcessed)
-                        fillerbytecount = makerNoteOffset - currentdataoffset;
-                    else
-                        fillerbytecount = 0;
-                }
+		//        // Try to preserve the makernote data offset
+		//        if (!makernotewritten &&
+		//            !makerNoteProcessed &&
+		//            makerNoteOffset != 0 &&
+		//            ifdtype == IFD.EXIF &&
+		//            field.Tag != ExifTag.MakerNote &&
+		//            interop.Data.Length > 4 &&
+		//            currentdataoffset + interop.Data.Length > makerNoteOffset &&
+		//            ifd.ContainsKey(ExifTag.MakerNote))
+		//        {
+		//            // Delay writing this field until we write makernote data
+		//            fieldqueue.Enqueue(field);
+		//            continue;
+		//        }
+		//        else if (field.Tag == ExifTag.MakerNote)
+		//        {
+		//            makernotewritten = true;
+		//            // We may need to write filler bytes to preserve maker note offset
+		//            if (preserveMakerNote && !makerNoteProcessed)
+		//                fillerbytecount = makerNoteOffset - currentdataoffset;
+		//            else
+		//                fillerbytecount = 0;
+		//        }
 
-                // Tag
-                stream.Write(conv.GetBytes(interop.TagID), 0, 2);
-                // Type
-                stream.Write(conv.GetBytes(interop.TypeID), 0, 2);
-                // Count
-                stream.Write(conv.GetBytes(interop.Count), 0, 4);
-                // Field data
-                byte[] data = interop.Data;
-                if (ByteOrder != BitConverterEx.SystemByteOrder)
-                {
-                    if (interop.TypeID == 1 || interop.TypeID == 3 || interop.TypeID == 4 || interop.TypeID == 9)
-                        Array.Reverse(data);
-                    else if (interop.TypeID == 5 || interop.TypeID == 10)
-                    {
-                        Array.Reverse(data, 0, 4);
-                        Array.Reverse(data, 4, 4);
-                    }
-                }
+		//        // Tag
+		//        stream.Write(conv.GetBytes(interop.TagID), 0, 2);
+		//        // Type
+		//        stream.Write(conv.GetBytes(interop.TypeID), 0, 2);
+		//        // Count
+		//        stream.Write(conv.GetBytes(interop.Count), 0, 4);
+		//        // Field data
+		//        byte[] data = interop.Data;
+		//        if (ByteOrder != BitConverterEx.SystemByteOrder)
+		//        {
+		//            if (interop.TypeID == 1 || interop.TypeID == 3 || interop.TypeID == 4 || interop.TypeID == 9)
+		//                Array.Reverse(data);
+		//            else if (interop.TypeID == 5 || interop.TypeID == 10)
+		//            {
+		//                Array.Reverse(data, 0, 4);
+		//                Array.Reverse(data, 4, 4);
+		//            }
+		//        }
 
-                // Fields containing offsets to other IFDs
-                // Just store their offets, we will write the values later on when we know the lengths of IFDs
-                if (ifdtype == IFD.Zeroth && interop.TagID == 0x8769)
-                    exifIFDFieldOffset = stream.Position;
-                else if (ifdtype == IFD.Zeroth && interop.TagID == 0x8825)
-                    gpsIFDFieldOffset = stream.Position;
-                else if (ifdtype == IFD.EXIF && interop.TagID == 0xa005)
-                    interopIFDFieldOffset = stream.Position;
-                else if (ifdtype == IFD.First && interop.TagID == 0x201)
-                    thumbOffsetLocation = stream.Position;
-                else if (ifdtype == IFD.First && interop.TagID == 0x202)
-                    thumbSizeLocation = stream.Position;
+		//        // Fields containing offsets to other IFDs
+		//        // Just store their offets, we will write the values later on when we know the lengths of IFDs
+		//        if (ifdtype == IFD.Zeroth && interop.TagID == 0x8769)
+		//            exifIFDFieldOffset = stream.Position;
+		//        else if (ifdtype == IFD.Zeroth && interop.TagID == 0x8825)
+		//            gpsIFDFieldOffset = stream.Position;
+		//        else if (ifdtype == IFD.EXIF && interop.TagID == 0xa005)
+		//            interopIFDFieldOffset = stream.Position;
+		//        else if (ifdtype == IFD.First && interop.TagID == 0x201)
+		//            thumbOffsetLocation = stream.Position;
+		//        else if (ifdtype == IFD.First && interop.TagID == 0x202)
+		//            thumbSizeLocation = stream.Position;
 
-                // Write 4 byte field value or field data
-                if (data.Length <= 4)
-                {
-                    stream.Write(data, 0, data.Length);
-                    for (int i = data.Length; i < 4; i++)
-                        stream.WriteByte(0);
-                }
-                else
-                {
-                    // Pointer to data area relative to TIFF header
-                    stream.Write(conv.GetBytes(currentdataoffset + fillerbytecount), 0, 4);
-                    // Actual data
-                    long currentoffset = stream.Position;
-                    stream.Seek(absolutedataoffset, SeekOrigin.Begin);
-                    // Write filler bytes
-                    for (int i = 0; i < fillerbytecount; i++)
-                        stream.WriteByte(0xFF);
-                    stream.Write(data, 0, data.Length);
-                    stream.Seek(currentoffset, SeekOrigin.Begin);
-                    // Increment pointers
-                    currentdataoffset += fillerbytecount + (uint)data.Length;
-                    absolutedataoffset += fillerbytecount + data.Length;
-                }
-            }
-            // Offset to 1st IFD
-            // We will write zeros for now. This will be filled after we write all IFDs
-            if (ifdtype == IFD.Zeroth)
-                firstIFDFieldOffset = stream.Position;
-            stream.Write(new byte[] { 0, 0, 0, 0 }, 0, 4);
+		//        // Write 4 byte field value or field data
+		//        if (data.Length <= 4)
+		//        {
+		//            stream.Write(data, 0, data.Length);
+		//            for (int i = data.Length; i < 4; i++)
+		//                stream.WriteByte(0);
+		//        }
+		//        else
+		//        {
+		//            // Pointer to data area relative to TIFF header
+		//            stream.Write(conv.GetBytes(currentdataoffset + fillerbytecount), 0, 4);
+		//            // Actual data
+		//            long currentoffset = stream.Position;
+		//            stream.Seek(absolutedataoffset, SeekOrigin.Begin);
+		//            // Write filler bytes
+		//            for (int i = 0; i < fillerbytecount; i++)
+		//                stream.WriteByte(0xFF);
+		//            stream.Write(data, 0, data.Length);
+		//            stream.Seek(currentoffset, SeekOrigin.Begin);
+		//            // Increment pointers
+		//            currentdataoffset += fillerbytecount + (uint)data.Length;
+		//            absolutedataoffset += fillerbytecount + data.Length;
+		//        }
+		//    }
+		//    // Offset to 1st IFD
+		//    // We will write zeros for now. This will be filled after we write all IFDs
+		//    if (ifdtype == IFD.Zeroth)
+		//        firstIFDFieldOffset = stream.Position;
+		//    stream.Write(new byte[] { 0, 0, 0, 0 }, 0, 4);
 
-            // Seek to end of IFD
-            stream.Seek(absolutedataoffset, SeekOrigin.Begin);
+		//    // Seek to end of IFD
+		//    stream.Seek(absolutedataoffset, SeekOrigin.Begin);
 
-            // Write thumbnail data
-            if (ifdtype == IFD.First)
-            {
-                if (Thumbnail != null)
-                {
-                    MemoryStream ts = new MemoryStream();
-                    Thumbnail.Save(ts);
-                    ts.Close();
-                    byte[] thumb = ts.ToArray();
-                    thumbOffsetValue = (uint)(stream.Position - tiffoffset);
-                    thumbSizeValue = (uint)thumb.Length;
-                    stream.Write(thumb, 0, thumb.Length);
-                    ts.Dispose();
-                }
-                else
-                {
-                    thumbOffsetValue = 0;
-                    thumbSizeValue = 0;
-                }
-            }
-        }
+		//    // Write thumbnail data
+		//    if (ifdtype == IFD.First)
+		//    {
+		//        if (Thumbnail != null)
+		//        {
+		//            MemoryStream ts = new MemoryStream();
+		//            Thumbnail.Save(ts);
+		//            ts.Close();
+		//            byte[] thumb = ts.ToArray();
+		//            thumbOffsetValue = (uint)(stream.Position - tiffoffset);
+		//            thumbSizeValue = (uint)thumb.Length;
+		//            stream.Write(thumb, 0, thumb.Length);
+		//            ts.Dispose();
+		//        }
+		//        else
+		//        {
+		//            thumbOffsetValue = 0;
+		//            thumbSizeValue = 0;
+		//        }
+		//    }
+		//}
         #endregion
 
         #region "Static Helper Methods"

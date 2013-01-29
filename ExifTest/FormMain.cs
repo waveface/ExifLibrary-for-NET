@@ -57,7 +57,7 @@ namespace ExifLibrary
             if (data.Thumbnail == null)
                 pbThumb.Image = null;
             else
-                pbThumb.Image = data.Thumbnail.ToBitmap();
+                pbThumb.Image = new Bitmap(data.Thumbnail);
 #if DEBUG
             binaryMapViewer1.Map = data.Map;
 #endif
@@ -65,7 +65,7 @@ namespace ExifLibrary
             this.Text = Path.GetFileName(filename) + " - Exif Test";
             lblStatus.Text = Path.GetFileName(filename);
             lblByteOrder.Text = "Byte Order: " + (data.ByteOrder == BitConverterEx.ByteOrder.LittleEndian ? "Little-Endian" : "Big-Endian");
-            lblThumbnail.Text = "Thumbnail: " + (data.Thumbnail == null ? "None" : data.Thumbnail.ToBitmap().Width.ToString() + "x" + data.Thumbnail.ToBitmap().Height.ToString());
+            lblThumbnail.Text = "Thumbnail: " + (data.Thumbnail == null ? "None" : pbThumb.Image.Width.ToString() + "x" + pbThumb.Image.Height.ToString());
 
             lvExif.Sort();
         }
